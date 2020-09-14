@@ -18,5 +18,31 @@
     <ClCompile Include="202008_15PB-Tanker.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CCtrl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CData.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CTanker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CCtrl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CTanker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

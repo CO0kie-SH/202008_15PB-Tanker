@@ -140,6 +140,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="202008_15PB-Tanker.cpp" />
+    <ClCompile Include="CCtrl.cpp" />
+    <ClCompile Include="CData.cpp" />
+    <ClCompile Include="CTanker.cpp" />
+    <ClCompile Include="CView.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CCtrl.h" />
+    <ClInclude Include="CData.h" />
+    <ClInclude Include="CTanker.h" />
+    <ClInclude Include="CView.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
