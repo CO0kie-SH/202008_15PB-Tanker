@@ -114,3 +114,30 @@ void CView::PrintTanker(CTanker* tTank,bool clean)
 			map[loc.Y + i - 1][loc.X + 1] = mapV;
 	}
 }
+
+
+void CView::PrintGINFO()
+{
+	//	https://blog.csdn.net/xingcen/article/details/55669054
+	char tick[MAX_PATH];					//用于存储格式的时间
+	time(&gGINFO->now);						//获取系统日期和时间
+	struct tm t;							//tm结构指针
+	localtime_s(&t, &gGINFO->now);			//获取当地日期和时间
+	strftime(tick, _countof(tick), "当前时间：%Y年%m月%d日%H:%M:%S", &t);
+	SHORT x = MAP_W + 3;
+	this->PrintPoint(x, 1, tick);
+	unsigned int s = (unsigned int)((GetTickCount64() - gGINFO->start) / 1000);
+	if (s > 59)
+		snprintf(tick, _countof(tick), "%s：%02d:%02d", "游戏时间", s / 60, s % 60);
+	else
+		snprintf(tick, _countof(tick), "%s：%05d", "游戏时间", s);
+	this->PrintPoint(x, 2, tick);
+	char i = 0;
+	for (; i < 6; i++)
+		this->PrintPoint(x, i + 5, GAMEDesc[i]);
+	for (i = 0; i < 5; i++)
+	{
+		snprintf(tick, _countof(tick), PlayerInfo[i], i);
+		this->PrintPoint(x, i + 12, tick);
+	}
+}

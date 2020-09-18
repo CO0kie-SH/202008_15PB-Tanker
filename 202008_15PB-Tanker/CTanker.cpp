@@ -3,10 +3,10 @@ CTanker::CTanker()
 {
 	this->m_team = 0;
 	this->m_id = 0;
-	this->m_blood = 0;
-	this->m_power = 0;
-	this->m_speed = 0;
-	this->m_kills = 0;
+	this->m_info.m_blood = 0;
+	this->m_info.m_power = 0;
+	this->m_info.m_speed = 0;
+	this->m_info.m_kills = 0;
 	this->m_x = this->m_y = 1;
 	this->NEXT = nullptr;
 	this->m_dir = 'W';
@@ -20,10 +20,10 @@ bool CTanker::init(byte team, unsigned int id, unsigned short blood, unsigned sh
 {
 	this->m_team = team;
 	this->m_id = id;
-	this->m_blood = blood;
-	this->m_power = power;
-	this->m_speed = speed;
-	this->m_kills = 0;
+	this->m_info.m_blood = blood;
+	this->m_info.m_power = power;
+	this->m_info.m_speed = speed;
+	this->m_info.m_kills = 0;
 	this->m_x = this->m_y = 1;
 	this->NEXT = nullptr;
 	this->m_dir = 'W';

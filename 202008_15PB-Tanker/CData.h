@@ -35,6 +35,21 @@ const char INFOMenu[][31] = {
 	{"④编辑地图"},
 	{"⑤ 退 出"}
 };
+const char GAMEDesc[][20] = {
+	{"玩家\t玩家 1\t玩家 2"},
+	{"向上\t  W\t  I"},
+	{"向左\t  A\t  J"},
+	{"向下\t  S\t  K"},
+	{"向右\t  D\t  L"},
+	{"开火\t  F\t  ;"}
+};
+const char PlayerInfo[][11] = {
+	{"血量\t  %d"},
+	{"速度\t  %d"},
+	{"攻击力  %d"},
+	{"杀敌数  %d"},
+	{"得  分  %d"}
+};
 #define MenuLen 6
 extern char gindex_Menu;
 //定义坦克的形状数组
@@ -52,7 +67,18 @@ const char szTankSharp[2][4][3][7] = {
 		{"□  □","□□□","  □  "}		//下
 	}
 };
+typedef struct _GAMEINFO {
+	time_t now;								//声明time_t类型变量
+	byte statu;
+	ULONGLONG start;
+}GAMEINFO, * PGAMEINFO;
+typedef struct _TANKINFO {
+	unsigned short	m_blood;
+	unsigned short	m_speed;
+	unsigned short	m_power;
+	unsigned short	m_kills;
+}TANKINFO;
 
-
-extern char map[MAP_H][MAP_W];                  //全局地图
-extern HANDLE gOUTPUT;                          //窗口输出句柄
+extern char map[MAP_H][MAP_W];				//全局地图
+extern HANDLE gOUTPUT;						//窗口输出句柄
+extern PGAMEINFO gGINFO;

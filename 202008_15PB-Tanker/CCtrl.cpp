@@ -2,9 +2,10 @@
 
 char map[MAP_H][MAP_W];
 HANDLE gOUTPUT;
-
+PGAMEINFO gGINFO;
 CCtrl::CCtrl()
 {
+	gGINFO = new GAMEINFO;
 }
 
 CCtrl::~CCtrl()
@@ -55,7 +56,7 @@ bool CCtrl::InitTank(byte mode)
 	this->cTank[0].SetXY(MAP_W / 2, MAP_H);
 	this->cTank[0].Run('W',2);
 	this->cV.PrintTanker(this->cTank);
-	this->cTank[2].SetXY(2, MAP_H / 2);
+	this->cTank[2].SetXY(1, MAP_H / 2);
 	this->cTank[2].Run('W');
 	this->cV.PrintTanker(this->cTank + 2);
 	this->cTank[3].SetXY(MAP_W / 2 - 3, 1);
@@ -157,24 +158,36 @@ int CCtrl::Go()
 	this->cV.PrintMap();
 	cout << "按【P】可暂停游戏。" << endl;				//初始化地图后
 	this->InitTank(0x01);
+	gGINFO->start = GetTickCount64();					//存储当前时间
 	//Sleep(1000);
 	while (key = _getch())
 	{
+		this->cV.PrintGINFO();
 		if (key == KEY_ESC) {
-			//time=   //获取系统时间并暂停 提示
+			gGINFO->start = GetTickCount64() - gGINFO->start;	//记录当前游戏时间
+			this->cV.PrintPoint(MAP_W + 3, 1, "游戏已暂停，                    ");
+			this->cV.PrintPoint(MAP_W + 3, 2, "任意键继续，    ");
+			this->cV.PrintPoint(MAP_W + 3, 3, "按Y 退出游戏。");
+			for (char i = 0; i < 7; i++)						//刷新面板
+				this->cV.PrintPoint(MAP_W + 3, i + 4, 
+					"                    ");
 			if (_getch() != 'Y')
-				key = 'P';			//下放至key='P' 恢复游戏
+				key = 'P';						//下放至key='P' 恢复游戏
 			else {
-				key = 0; break;		//结束游戏
+				key = 0; break;					//结束游戏
 			}
 		}
 		switch (key) {
 		case 'W':case 'A':case 'S':case 'D':
 			this->cV.PrintTanker(this->cTank, true);
-			//this->cTank[0].SetXY(1, 1);
 			this->cTank[0].Run(key);
 			this->cV.PrintTanker(this->cTank);
 			break;
+		case 'P':
+			gGINFO->start = GetTickCount64() - gGINFO->start;	//重置游戏开始的时间
+			for (char i = 0; i < 9; i++) {						//刷新提示空白
+				this->cV.PrintPoint(MAP_W + 3, i + 1, "              ");
+			} break;
 		default:
 			break;
 		}
