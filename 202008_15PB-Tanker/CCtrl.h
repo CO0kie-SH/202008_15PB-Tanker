@@ -1,6 +1,7 @@
 #pragma once
 #include "CView.h"
-#include <cstdio>
+#include <list>
+using namespace std;
 
 class CCtrl
 {
@@ -15,6 +16,7 @@ public:
 private:
 	CView cV;
 	CTanker cTank[6];
+	list<CBullet> _bullets;
 	int SetMapV(byte nNum);
 	int Go();
 };

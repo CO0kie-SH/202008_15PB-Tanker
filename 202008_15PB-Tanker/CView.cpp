@@ -76,6 +76,10 @@ void CView::PrintMenu(char nNew)
 
 void CView::PrintPoint(SHORT X,SHORT Y, const char* Text,WORD Color)
 {
+	if (map[Y - 1][X - 1] == INDEX_草)
+		Color = 0x0A;
+	if (map[Y - 1][X - 1] == INDEX_河)
+		Color = 0x03;
 	if (Color != NULL)
 	{
 		SetConsoleTextAttribute(gOUTPUT, Color);	//设置颜色
@@ -115,6 +119,49 @@ void CView::PrintTanker(CTanker* tTank,bool clean)
 	}
 }
 
+bool CView::PrintBullet(BULLETINFO *info)
+{
+	if (info->_start) return true;
+	//判断墙
+	SHORT x = info->_newxy.X, y = info->_newxy.Y;
+	char tmap = map[y][x];
+	bool green = false, wall = false, door = false;
+	if (tmap == INDEX_WALL) {
+		this->PrintPoint(x+1, y+1, INFOFoods[INDEX_WALL]);
+		this->PrintPoint(info->_xy.X + 1, info->_xy.Y + 1,
+			INFOFoods[map[info->_xy.Y][info->_xy.X]]);
+		return false;
+	}else if (tmap == INDEX_草)
+	{
+		green = true;
+	}else if (tmap == INDEX_DOOR)
+	{
+		tmap='\0';
+		map[info->_newxy.Y][info->_newxy.X] = '\0';
+		this->PrintPoint(x + 1, y + 1, INFOFoods[tmap]);
+		door = true;
+	}
+	x = info->_xy.X + 1, y = info->_xy.Y + 1;
+	tmap = map[info->_xy.Y][info->_xy.X];
+	if (tmap == INDEX_河和子弹) {
+		this->PrintPoint(x, y, INFOFoods[tmap]);
+		map[y - 1][x - 1] = INDEX_河;
+	}
+	else if (tmap ==INDEX_草和子弹) {
+		this->PrintPoint(x, y, INFOFoods[tmap]);
+		map[y - 1][x - 1] = INDEX_草;
+	}
+	else {
+		this->PrintPoint(x, y, INFOFoods[tmap]);
+	}
+	if (door) return false;
+	if (info->_newxy.X == MAP_W || info->_newxy.Y == MAP_H)
+		return false;
+	if (!green)
+		this->PrintPoint(info->_newxy.X + 1, info->_newxy.Y + 1, "●");
+	return true;
+}
+
 
 void CView::PrintGINFO()
 {
@@ -130,7 +177,7 @@ void CView::PrintGINFO()
 	if (s > 59)
 		snprintf(tick, _countof(tick), "%s：%02d:%02d", "游戏时间", s / 60, s % 60);
 	else
-		snprintf(tick, _countof(tick), "%s：%05d", "游戏时间", s);
+		snprintf(tick, _countof(tick), "%s：00:%02d", "游戏时间", s);
 	this->PrintPoint(x, 2, tick);
 	char i = 0;
 	for (; i < 6; i++)

@@ -160,6 +160,7 @@ int CCtrl::Go()
 	this->InitTank(0x01);
 	gGINFO->start = GetTickCount64();					//存储当前时间
 	//Sleep(1000);
+	BULLETINFO tmp;
 	while (key = _getch())
 	{
 		this->cV.PrintGINFO();
@@ -188,6 +189,45 @@ int CCtrl::Go()
 			for (char i = 0; i < 9; i++) {						//刷新提示空白
 				this->cV.PrintPoint(MAP_W + 3, i + 1, "              ");
 			} break;
+		case 'F': {
+			CBullet att = CBullet(this->cTank->GetCOORD(),
+				this->cTank->GetDir(false), 1);
+			att.SetInfo(&tmp);
+			cV.PrintBullet(&tmp);
+			_bullets.push_back(att);
+			break;
+		}case 'G': {
+			//循环子弹
+			auto begin = _bullets.begin();
+			while (begin != _bullets.end())
+			{
+				bool isM = (*begin).TryMove(&tmp);
+				//试图移动后做碰撞检测
+				if (isM) {
+					//打印
+					if (cV.PrintBullet(&tmp)) {
+						(*begin).Move();
+						++begin;
+						continue;
+					}
+				}
+				else {
+					if (tmp._newxy.Y < 0) tmp._newxy.Y++;
+					if (tmp._newxy.X < 0) tmp._newxy.X++;
+				}
+				//删除子弹
+				SHORT x = tmp._newxy.X, y = tmp._newxy.Y;
+				if (x==0||y==0) {
+					cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1, "　");
+				}
+				if (x==MAP_W||y==MAP_H) {
+					cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1,
+						INFOFoods[INDEX_WALL]);
+				}
+				begin = _bullets.erase(begin);
+			}
+			break;
+		}
 		default:
 			break;
 		}

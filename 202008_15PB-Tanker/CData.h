@@ -21,7 +21,9 @@ private:
 #define KEY_ESC 27
 
 //定义地图中的内容
-const char INFOFoods[][3] = { "  ","※" ,"≈","■","■" };
+const char INFOFoods[][3] = { "　","※" ,"≈","■","◇","※","●" };
+#define INDEX_草和子弹 0x06
+#define INDEX_河和子弹 0x05
 #define INDEX_DOOR 0x04
 #define INDEX_WALL 0x03
 #define INDEX_河 0x02
@@ -78,6 +80,12 @@ typedef struct _TANKINFO {
 	unsigned short	m_power;
 	unsigned short	m_kills;
 }TANKINFO;
+typedef struct _BULLETINFO {
+	COORD	_xy;
+	COORD	_newxy;
+	byte	_alive;
+	unsigned int _start;
+}BULLETINFO, * PBULLETINFO;
 
 extern char map[MAP_H][MAP_W];				//全局地图
 extern HANDLE gOUTPUT;						//窗口输出句柄
