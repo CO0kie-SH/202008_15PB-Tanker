@@ -28,10 +28,12 @@ public:
 		}}
 		return this->m_dir;
 	};
+	void SetDir(byte dir) { m_dir = dir; };
 	COORD GetCOORD() { return COORD{ this->m_x,this->m_y }; };
 	byte GetTeam() { return this->m_team; };
 	bool Run(byte dir = NULL, short num = 1);
-	class CTanker* NEXT;
+	bool TryMove() {};
+	unsigned short GetBlood() { return m_info.m_blood; };
 private:
 	short	m_x;
 	short	m_y;

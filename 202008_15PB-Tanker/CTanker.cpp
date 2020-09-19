@@ -8,7 +8,6 @@ CTanker::CTanker()
 	this->m_info.m_speed = 0;
 	this->m_info.m_kills = 0;
 	this->m_x = this->m_y = 1;
-	this->NEXT = nullptr;
 	this->m_dir = 'W';
 }
 
@@ -25,7 +24,6 @@ bool CTanker::init(byte team, unsigned int id, unsigned short blood, unsigned sh
 	this->m_info.m_speed = speed;
 	this->m_info.m_kills = 0;
 	this->m_x = this->m_y = 1;
-	this->NEXT = nullptr;
 	this->m_dir = 'W';
 	return true;
 }

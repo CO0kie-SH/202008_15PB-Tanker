@@ -3,13 +3,26 @@
 char map[MAP_H][MAP_W];
 HANDLE gOUTPUT;
 PGAMEINFO gGINFO;
+
+void CCtrl::API_OutputDebugPrintf(const char* strOutputString, ...)
+{
+	char strBuffer[4096] = { 0 };
+	va_list vlArgs;
+	va_start(vlArgs, strOutputString);
+	_vsnprintf_s(strBuffer, sizeof(strBuffer) - 1, strOutputString, vlArgs);
+	//vsprintf(strBuffer, strOutputString, vlArgs);
+	va_end(vlArgs);
+	OutputDebugString(CA2W(strBuffer));
+}
 CCtrl::CCtrl()
 {
 	gGINFO = new GAMEINFO;
+	srand(time(NULL));
 }
 
 CCtrl::~CCtrl()
 {
+	delete gGINFO;
 }
 
 bool CCtrl::InitCMD(short nX, short nY)
@@ -166,9 +179,9 @@ int CCtrl::Go()
 		this->cV.PrintGINFO();
 		if (key == KEY_ESC) {
 			gGINFO->start = GetTickCount64() - gGINFO->start;	//记录当前游戏时间
-			this->cV.PrintPoint(MAP_W + 3, 1, "游戏已暂停，                    ");
-			this->cV.PrintPoint(MAP_W + 3, 2, "任意键继续，    ");
-			this->cV.PrintPoint(MAP_W + 3, 3, "按Y 退出游戏。");
+			this->cV.PrintPoint(MAP_W + 3, 1, "游戏已暂停，                    ", 0x0C);
+			this->cV.PrintPoint(MAP_W + 3, 2, "任意键继续，    ", 0x0C);
+			this->cV.PrintPoint(MAP_W + 3, 3, "按Y 退出游戏。", 0x0C);
 			for (char i = 0; i < 7; i++)						//刷新面板
 				this->cV.PrintPoint(MAP_W + 3, i + 4, 
 					"                    ");
@@ -193,41 +206,16 @@ int CCtrl::Go()
 			CBullet att = CBullet(this->cTank->GetCOORD(),
 				this->cTank->GetDir(false), 1);
 			att.SetInfo(&tmp);
-			cV.PrintBullet(&tmp);
-			_bullets.push_back(att);
-			break;
-		}case 'G': {
-			//循环子弹
-			auto begin = _bullets.begin();
-			while (begin != _bullets.end())
-			{
-				bool isM = (*begin).TryMove(&tmp);
-				//试图移动后做碰撞检测
-				if (isM) {
-					//打印
-					if (cV.PrintBullet(&tmp)) {
-						(*begin).Move();
-						++begin;
-						continue;
-					}
-				}
-				else {
-					if (tmp._newxy.Y < 0) tmp._newxy.Y++;
-					if (tmp._newxy.X < 0) tmp._newxy.X++;
-				}
-				//删除子弹
-				SHORT x = tmp._newxy.X, y = tmp._newxy.Y;
-				if (x==0||y==0) {
-					cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1, "　");
-				}
-				if (x==MAP_W||y==MAP_H) {
-					cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1,
-						INFOFoods[INDEX_WALL]);
-				}
-				begin = _bullets.erase(begin);
+			if (CheckMap(tmp)) {
+				if (INDEX_草和子弹 != map[tmp._newxy.Y][tmp._newxy.X])
+					cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1, "弹");
+				_bullets.push_back(att);
 			}
 			break;
-		}
+		}case 'G': 
+			MoveTank(true, false);
+			MoveBullet();
+			MoveTank(false, true); break;
 		default:
 			break;
 		}
@@ -235,3 +223,177 @@ int CCtrl::Go()
 	memset(map, 0, MAP_H * MAP_W);
 	return 0;
 }
+
+void CCtrl::MoveBullet(bool del, bool print)
+{
+	byte ver = 2;
+	BULLETINFO tmp;
+	SHORT ox = 0, oy = 0, nx = 0, ny = 0;
+	char omap = map[oy][ox], nmap = map[ny][nx];
+	auto begin = _bullets.begin();
+	//版本2
+#pragma region 循环子弹版本2
+	if (ver > 2) return;
+	while (del && begin != _bullets.end())
+	{
+		(*begin).TryMove(&tmp);
+		ox = tmp._xy.X; oy = tmp._xy.Y;
+		omap = map[oy][ox];
+		if (INDEX_河和子弹 == omap) {
+			map[oy][ox] = INDEX_河;
+			cV.PrintPoint(ox + 1, oy + 1,
+				INFOFoods[INDEX_河], COLOR_河);
+		}
+		else if (INDEX_草和子弹 == omap) {
+			map[oy][ox] = INDEX_草;
+			cV.PrintPoint(ox + 1, oy + 1, INFOFoods[INDEX_草]);
+		}
+		else {
+			map[oy][ox] = INDEX_空;
+			cV.PrintPoint(ox + 1, oy + 1, INFOFoods[INDEX_空]);
+		}
+		if (CheckMap(tmp)) (*begin).Move();
+		else (*begin).SetAlive(tmp._alive);
+		++begin;
+	}
+	//遍历子弹，失效的则析构
+	begin = _bullets.begin();
+	while (print && begin != _bullets.end())
+	{
+		(*begin).SetInfo(&tmp);
+		if (tmp._alive != '\0')
+			begin = _bullets.erase(begin);
+		else {
+			//画子弹的新点
+			COORD xy = (*begin).Move();
+			char s = 0;
+			if (INDEX_草和子弹 == map[xy.Y][xy.X])
+				s = INDEX_草和子弹;
+			else s = INDEX_河和子弹;
+			
+			if (INDEX_草和子弹 == s)
+				cV.PrintPoint(xy.X + 1, xy.Y + 1, INFOFoods[s], 0x0A);
+			else cV.PrintPoint(xy.X + 1, xy.Y + 1, INFOFoods[s]);
+			++begin;
+		}
+	}
+#pragma endregion
+	//版本1
+#pragma region 循环子弹版1
+	if (ver > 1) return;
+	while (begin != _bullets.end())
+	{
+		bool isM = (*begin).TryMove(&tmp);
+		//试图移动后做碰撞检测
+		if (isM) {
+			//打印
+			if (cV.PrintBullet(&tmp)) {
+				(*begin).Move();
+				++begin;
+				continue;
+			}
+		}
+		else {
+			if (tmp._newxy.Y < 0) tmp._newxy.Y++;
+			if (tmp._newxy.X < 0) tmp._newxy.X++;
+		}
+		//删除子弹
+		SHORT x = tmp._newxy.X, y = tmp._newxy.Y;
+		if (x == 0 || y == 0) {
+			cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1, "　");
+		}
+		if (x == MAP_W || y == MAP_H) {
+			cV.PrintPoint(tmp._newxy.X + 1, tmp._newxy.Y + 1,
+				INFOFoods[INDEX_WALL]);
+		}
+		begin = _bullets.erase(begin);
+	}
+#pragma endregion
+}
+
+void CCtrl::MoveTank(bool del, bool print)
+{
+	CTanker& cT = this->cTank[2];
+	COORD txy = cT.GetCOORD();
+	SHORT x, y;
+	char buff[4096] = { 0 }, i = 0, j = 0, tmap = 0;
+	if (del) {
+		cV.PrintTanker(&cT, true);
+	}
+	if (print) {
+		switch (this->API_GetRand()%10) {
+		case 1: cT.SetDir('W'); break;
+		case 2: cT.SetDir('A'); break;
+		case 3: cT.SetDir('S'); break;
+		case 4: cT.SetDir('D'); break;
+		default: break; }
+		cT.Run();
+		x = cT.GetX(); y = cT.GetY();
+		//判断坐标点是否为子弹
+		for (j =-1; j < 2; j++)
+		{
+			for (i = -1; i < 2; i++)
+			{
+				tmap = map[y + j][x + i];
+				API_OutputDebugPrintf("x=%d;y=%d,%d\t",
+					x + i, y + j, tmap);
+				if (INDEX_子弹 == tmap) {
+					//Find子弹属于谁，加分，并摧毁子弹
+
+					//摧毁坦克
+					
+				}
+			}
+			API_OutputDebugPrintf("\n");
+		}
+
+		cV.PrintTanker(&cT, false);
+	}
+}
+
+//判断地图中子弹是否碰撞
+bool CCtrl::CheckMap(BULLETINFO& info)
+{
+	if (info._newxy.X == MAP_W || info._newxy.Y == MAP_H) {
+		info._alive = 'w'; return false;
+	}
+	else if (info._newxy.X == -1||-1==info._newxy.Y) {
+		info._alive = 'w'; return false;
+	}
+	else if (INDEX_WALL == map[info._newxy.Y][info._newxy.X]) {
+		info._alive = 'w'; return false;
+	}
+	else if (INDEX_河 == map[info._newxy.Y][info._newxy.X]) {
+		map[info._newxy.Y][info._newxy.X] = INDEX_河和子弹;
+	}
+	else if (INDEX_草 == map[info._newxy.Y][info._newxy.X]) {
+		map[info._newxy.Y][info._newxy.X] = INDEX_草和子弹;
+	}
+	else if (INDEX_DOOR == map[info._newxy.Y][info._newxy.X]) {
+		info._alive = 'd';
+		map[info._newxy.Y][info._newxy.X] = INDEX_空;
+		this->cV.PrintPoint(info._newxy.X + 1, info._newxy.Y + 1,
+			INFOFoods[INDEX_空]);
+		return false;
+	}
+	else if (INDEX_草和子弹 == map[info._newxy.Y][info._newxy.X]) {
+		info._alive = 'c'; return false;
+	}
+	else if (INDEX_河和子弹 == map[info._newxy.Y][info._newxy.X]) {
+		info._alive = 'h'; return false;
+	}
+	else if (INDEX_子弹 == map[info._newxy.Y][info._newxy.X]) {
+		info._alive = 'z'; return false;
+	}
+	else {
+		map[info._newxy.Y][info._newxy.X] = INDEX_子弹;
+	}
+	return true;
+}
+
+//判断地图中坦克是否碰撞
+bool CCtrl::CheckMap(CTanker& info)
+{
+	return true;
+}
+

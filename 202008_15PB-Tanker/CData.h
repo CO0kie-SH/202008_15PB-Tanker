@@ -1,8 +1,6 @@
 #pragma once
 
 #include <windows.h>
-//#include <random>
-
 
 class CData
 {
@@ -21,13 +19,17 @@ private:
 #define KEY_ESC 27
 
 //定义地图中的内容
-const char INFOFoods[][3] = { "　","※" ,"≈","■","◇","※","●" };
+const char INFOFoods[][3] = { "　","※" ,"≈","■","◇","●","※","●" };
+#define INDEX_子弹 0x07
 #define INDEX_草和子弹 0x06
 #define INDEX_河和子弹 0x05
+#define COLOR_河和子弹 0x03
 #define INDEX_DOOR 0x04
 #define INDEX_WALL 0x03
 #define INDEX_河 0x02
+#define COLOR_河 0x03
 #define INDEX_草 0x01
+#define INDEX_空 0x00
 
 const char INFOMenu[][31] = {
 	{"欢迎使用CO0Kie丶初代坦克大战。"},
@@ -75,6 +77,8 @@ typedef struct _GAMEINFO {
 	ULONGLONG start;
 }GAMEINFO, * PGAMEINFO;
 typedef struct _TANKINFO {
+	COORD oxy;
+	COORD nxy;
 	unsigned short	m_blood;
 	unsigned short	m_speed;
 	unsigned short	m_power;

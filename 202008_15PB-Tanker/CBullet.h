@@ -32,14 +32,17 @@ public:
 		}
 	};
 	//改变子弹并返回坐标
-	void Move() {
+	COORD Move() {
 		if (_start) --_start;
 		else {
 			//修改地图的值
 			//map[]
 		}
 		this->_xy = { this->_newxy.X,this->_newxy.Y };
+		return this->_newxy;
 	}
+
+	void SetAlive(byte c) { _alive = c; };
 private:
 	COORD	_xy;
 	COORD	_newxy;

@@ -78,8 +78,10 @@ void CView::PrintPoint(SHORT X,SHORT Y, const char* Text,WORD Color)
 {
 	if (map[Y - 1][X - 1] == INDEX_草)
 		Color = 0x0A;
-	if (map[Y - 1][X - 1] == INDEX_河)
-		Color = 0x03;
+	else if (map[Y - 1][X - 1] == INDEX_河)
+		Color = COLOR_河;
+	else if (map[Y - 1][X - 1] == INDEX_河和子弹)
+		Color = COLOR_河;
 	if (Color != NULL)
 	{
 		SetConsoleTextAttribute(gOUTPUT, Color);	//设置颜色
@@ -119,14 +121,29 @@ void CView::PrintTanker(CTanker* tTank,bool clean)
 	}
 }
 
+// 待删除该函数
 bool CView::PrintBullet(BULLETINFO *info)
 {
 	if (info->_start) return true;
 	//判断墙
-	SHORT x = info->_newxy.X, y = info->_newxy.Y;
-	char tmap = map[y][x];
-	bool green = false, wall = false, door = false;
-	if (tmap == INDEX_WALL) {
+	SHORT ox = info->_xy.X, oy = info->_xy.Y,
+		nx = info->_newxy.X, ny = info->_newxy.Y;
+	char omap = map[oy][ox], nmap = map[ny][nx];
+	//先销毁旧的
+	if (omap == INDEX_河和子弹)
+	{
+		this->PrintPoint(ox + 1, ox + 1, INFOFoods[INDEX_河]);
+		map[oy][ox] = INDEX_河;
+	}
+	else if (omap == INDEX_草和子弹)
+	{
+		this->PrintPoint(ox + 1, ox + 1, INFOFoods[INDEX_河]);
+		map[oy][ox] = INDEX_草;
+	}
+	//判断并打印新坐标
+
+	/*
+	if (omap == INDEX_WALL) {
 		this->PrintPoint(x+1, y+1, INFOFoods[INDEX_WALL]);
 		this->PrintPoint(info->_xy.X + 1, info->_xy.Y + 1,
 			INFOFoods[map[info->_xy.Y][info->_xy.X]]);
@@ -159,6 +176,11 @@ bool CView::PrintBullet(BULLETINFO *info)
 		return false;
 	if (!green)
 		this->PrintPoint(info->_newxy.X + 1, info->_newxy.Y + 1, "●");
+
+	if (green)
+		map[info->_newxy.Y][info->_newxy.X] = INDEX_草和子弹;
+	/*if (green)
+		map[info->_newxy.Y][info->_newxy.X] = INDEX_草和子弹;*/
 	return true;
 }
 
