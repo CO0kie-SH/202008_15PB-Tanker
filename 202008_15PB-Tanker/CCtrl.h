@@ -31,7 +31,5 @@ private:
 	void MoveTank(bool del = true, bool print = true);
 	bool CheckMap(BULLETINFO& info);
 	bool CheckMap(CTanker& info);
-	void FindBullet(COORD xy, bool addkill = true) {
-
-	};
+	void FindBullet(COORD xy, bool addkill = true);
 };

@@ -335,16 +335,19 @@ void CCtrl::MoveTank(bool del, bool print)
 			for (i = -1; i < 2; i++)
 			{
 				tmap = map[y + j][x + i];
-				API_OutputDebugPrintf("x=%d;y=%d,%d\t",
-					x + i, y + j, tmap);
+				/*API_OutputDebugPrintf("x=%d;y=%d,%d\t",
+					x + i, y + j, tmap);*/
 				if (INDEX_子弹 == tmap) {
 					//Find子弹属于谁，加分，并摧毁子弹
-
+					this->FindBullet({ x + i,y + j });
 					//摧毁坦克
-					
+					cV.PrintTanker(&cT, true);
+					cT.SetXY(1, 1);
+					cV.PrintTanker(&cT);
+					i = j = 3;
 				}
 			}
-			API_OutputDebugPrintf("\n");
+			//API_OutputDebugPrintf("\n");
 		}
 
 		cV.PrintTanker(&cT, false);
@@ -395,5 +398,27 @@ bool CCtrl::CheckMap(BULLETINFO& info)
 bool CCtrl::CheckMap(CTanker& info)
 {
 	return true;
+}
+
+void CCtrl::FindBullet(COORD xy, bool addkill)
+{
+	auto begin = _bullets.begin();
+	CBullet* pbullet = nullptr;
+	while (begin != _bullets.end())
+	{
+		if ((*begin).CheckXY(xy, 'k'))
+		{
+			//移除子弹
+			//pbullet->SetAlive('k');
+			//更新击杀数
+			/*if (addkill) {
+				this->cTank[pbullet->GetTanker()];
+			}*/
+			return;
+		}
+		begin++;
+	}
+	//不可能情况
+	begin++;
 }
 

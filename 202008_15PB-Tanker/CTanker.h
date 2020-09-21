@@ -34,6 +34,9 @@ public:
 	bool Run(byte dir = NULL, short num = 1);
 	bool TryMove() {};
 	unsigned short GetBlood() { return m_info.m_blood; };
+	unsigned short SetBlood(short blood) {
+		this->m_info.m_blood += blood;
+		return m_info.m_blood; };
 private:
 	short	m_x;
 	short	m_y;

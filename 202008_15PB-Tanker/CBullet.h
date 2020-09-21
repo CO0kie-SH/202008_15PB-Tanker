@@ -43,6 +43,14 @@ public:
 	}
 
 	void SetAlive(byte c) { _alive = c; };
+
+	bool CheckXY(COORD xy, byte c = NULL) {
+		bool is = xy.X == _xy.X && xy.Y == _xy.Y;
+		if (is && c) this->_alive = c;
+		return is;
+	};
+
+	unsigned int GetTanker() { return _tid; };
 private:
 	COORD	_xy;
 	COORD	_newxy;
